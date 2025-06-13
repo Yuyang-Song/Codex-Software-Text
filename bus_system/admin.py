@@ -1,3 +1,10 @@
+"""Admin registrations for the school bus system.
+
+The PDF document describes management of users, drivers, vehicles and
+dispatch records. These admin classes expose those models in the Django
+admin site with some search and list customisation.
+"""
+
 from django.contrib import admin
 from .models import User, Driver, Vehicle, Booking, Dispatch, LocationHistory
 
@@ -34,3 +41,4 @@ admin.site.register(Booking, BookingAdmin)
 admin.site.register(Dispatch, DispatchAdmin)
 
 admin.site.register(LocationHistory)
+
