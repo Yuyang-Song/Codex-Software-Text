@@ -1,0 +1,69 @@
+{% extends 'bus_system/base.html' %}
+
+{% block title %}统计分析{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">运营统计分析</h2>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    每日预约量
+                </div>
+                <div class="card-body">
+                    <canvas id="bookingsChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    车辆利用率
+                </div>
+                <div class="card-body">
+                    <canvas id="utilizationChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            热门路线
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>路线</th>
+                        <th>预约次数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for route in stats.popular_routes %}
+                    <tr>
+                        <td>{{ route.name }}</td>
+                        <td>{{ route.count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 实际项目中应使用Chart.js等库绘制图表
+    // 这里仅示意
+    console.log("统计数据:", JSON.parse('{{ stats_json|safe }}'));
+    
+    // 伪代码：绘制图表
+    // const ctx = document.getElementById('bookingsChart').getContext('2d');
+    // new Chart(ctx, { ... });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'bus_system/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">实时车辆监控</h2>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div id="map" style="height: 500px; background: #f0f0f0; border-radius: 8px;">
+                <!-- 实际项目中应集成地图API -->
+                <div class="text-center py-5">
+                    <h4>车辆位置地图</h4>
+                    <p class="text-muted">此处将显示实时车辆位置</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>活跃车辆</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for dispatch in active_dispatches %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>{{ dispatch.vehicle.plate_number }}</strong>
+                                <div>司机: {{ dispatch.driver.user.username }}</div>
+                                <div>路线: {{ dispatch.booking.pickup_location }} → {{ dispatch.booking.destination }}</div>
+                            </div>
+                            <button class="btn btn-sm btn-info track-btn" data-id="{{ dispatch.id }}">
+                                追踪
+                            </button>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const trackButtons = document.querySelectorAll('.track-btn');
+    
+    trackButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const dispatchId = this.getAttribute('data-id');
+            alert(`开始追踪调度任务 #${dispatchId}`);
+            // 实际项目中应调用地图API聚焦该车辆
+        });
+    });
+    
+    // WebSocket连接示例
+    const socket = new WebSocket("ws://localhost:8000/ws/location-updates/");
+    
+    socket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        console.log("位置更新:", data);
+        // 更新地图上的车辆位置
+    };
+});
+</script>
+{% endblock %}
