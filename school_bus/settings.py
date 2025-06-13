@@ -1,3 +1,5 @@
+"""Django settings for the school bus demo project."""
+
 import os
 from pathlib import Path
 

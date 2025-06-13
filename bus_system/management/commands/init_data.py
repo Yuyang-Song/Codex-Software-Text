@@ -1,3 +1,9 @@
+"""Management command to bootstrap example data.
+
+The demo data helps illustrate the workflow described in the PDF by creating
+users, drivers and vehicles that can be used during development.
+"""
+
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from bus_system.models import User, Driver, Vehicle

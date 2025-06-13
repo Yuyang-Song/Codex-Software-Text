@@ -1,3 +1,9 @@
+"""Basic tests for the bus management system.
+
+These unit tests ensure core models and views behave as expected. They are
+derived from the features outlined in the PDF document.
+"""
+
 from django.test import TestCase
 from django.urls import reverse
 from .models import User, Vehicle, Booking

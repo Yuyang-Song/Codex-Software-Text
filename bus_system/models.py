@@ -1,7 +1,16 @@
+"""Database models for the school bus management system.
+
+These models follow the project description in the accompanying PDF. The
+specification mentions modules such as user management, driver management,
+vehicle scheduling and historical tracking. Each class below represents one
+of these modules.
+"""
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
+    """System user with an additional phone field and credit rating."""
     CREDIT_CHOICES = [
         ('A', '优秀'),
         ('B', '良好'),
@@ -15,6 +24,7 @@ class User(AbstractUser):
         return self.username
 
 class Driver(models.Model):
+    """Model representing a bus driver."""
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     license_number = models.CharField(max_length=20)
     hire_date = models.DateField()
@@ -23,6 +33,7 @@ class Driver(models.Model):
         return self.user.username
 
 class Vehicle(models.Model):
+    """Information about each vehicle in the fleet."""
     STATUS_CHOICES = [
         ('A', '可用'),
         ('M', '维护中'),
@@ -38,6 +49,7 @@ class Vehicle(models.Model):
         return self.plate_number
 
 class Booking(models.Model):
+    """A passenger reservation for a specific trip."""
     STATUS_CHOICES = [
         ('P', '待处理'),
         ('C', '已确认'),
@@ -55,6 +67,7 @@ class Booking(models.Model):
         return f"{self.user} - {self.scheduled_time}"
 
 class Dispatch(models.Model):
+    """Assignment of a driver and vehicle to a booking."""
     booking = models.OneToOneField(Booking, on_delete=models.CASCADE)
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE)
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
@@ -64,6 +77,7 @@ class Dispatch(models.Model):
         return f"调度#{self.id}"
 
 class LocationHistory(models.Model):
+    """Historical GPS points for a dispatch, used for tracking."""
     dispatch = models.ForeignKey(Dispatch, on_delete=models.CASCADE)
     latitude = models.DecimalField(max_digits=9, decimal_places=6)
     longitude = models.DecimalField(max_digits=9, decimal_places=6)

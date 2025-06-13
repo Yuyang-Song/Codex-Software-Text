@@ -1,3 +1,9 @@
+"""Views for the bus management system.
+
+These views implement real-time monitoring, location updates and
+statistical pages, all of which are mentioned in the project PDF.
+"""
+
 from django.shortcuts import render
 from .models import Dispatch, LocationHistory
 import json
@@ -5,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 
 def realtime_monitor(request):
+    """Display active dispatches on the monitoring page."""
     active_dispatches = Dispatch.objects.filter(
         booking__status='C'
     ).select_related('driver', 'vehicle')
@@ -16,6 +23,7 @@ def realtime_monitor(request):
 
 @csrf_exempt
 def update_location(request, dispatch_id):
+    """Receive GPS coordinates from the driver app."""
     if request.method == 'POST':
         try:
             dispatch = Dispatch.objects.get(id=dispatch_id)
@@ -31,6 +39,7 @@ def update_location(request, dispatch_id):
     return JsonResponse({'status': 'invalid_method'}, status=405)
 
 def statistics_view(request):
+    """Render a demo statistics page using static data."""
     # 实际项目中应使用Matplotlib/Plotly生成图表
     # 这里使用静态数据演示
     stats_data = {
