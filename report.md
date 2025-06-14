@@ -121,13 +121,99 @@ sequenceDiagram
     B-->>U: 预约确认
 ```
 
+### 3.3 系统架构
+
+整体架构分为三层：移动端/浏览器客户端、Django 后端以及 SQLite 数据库。后台管理
+界面基于 Django Admin 构建，同时提供 REST 风格接口供用户端与司机端调用。数据
+可视化页面使用 Matplotlib/Plotly 生成图表。模块关系如图所示。
+
+```mermaid
+graph TD
+    subgraph Client
+        U[用户 APP]
+        D[司机 APP]
+        M[管理后台]
+    end
+    subgraph Django Backend
+        UM[用户管理]
+        DM[司机管理]
+        VM[车辆管理]
+        BM[预约/调度]
+        HM[历史记录]
+        ST[统计分析]
+    end
+    subgraph DB
+        sqlite[(SQLite)]
+    end
+
+    U -- API --> BM
+    D -- API --> BM
+    M -- Admin --> UM
+    M -- Admin --> DM
+    M -- Admin --> VM
+    UM --> sqlite
+    DM --> sqlite
+    VM --> sqlite
+    BM --> sqlite
+    HM --> sqlite
+    ST --> sqlite
+```
+
+### 3.4 模块划分
+
+根据 PDF 说明，系统主要划分为下表中的功能模块：
+
+| 模块名称   | 描述                                   |
+|------------|----------------------------------------|
+| 用户管理   | 查看/新增/修改/删除用户信息             |
+| 司机管理   | 查看/新增/修改/删除司机信息             |
+| 车辆管理   | 查询车辆状态并维护车辆信息             |
+| 预约管理   | 查询和编辑乘客的预约记录               |
+| 调度管理   | 手动或辅助方式分派车辆与司机           |
+| 历史记录   | 保存并查询车辆行驶轨迹和任务记录       |
+| 统计分析   | 使用 Matplotlib/Plotly 生成运营图表     |
+
+### 3.5 技术栈
+
+项目使用的主要工具和库如下表所示：
+
+| 技术       | 作用                                 | 是否开源 |
+|------------|--------------------------------------|---------|
+| Django     | 构建后台管理和 API 接口               | ✅       |
+| SQLite     | 轻量级数据库，便于部署               | ✅       |
+| Bootstrap  | 提供基础 UI 样式，页面简洁           | ✅       |
+| Matplotlib/Plotly | 绘制统计图形                     | ✅       |
+| Jinja2     | Django 模板引擎，渲染动态页面         | ✅       |
+| Git        | 版本管理与协作开发                   | ✅       |
+| Postman    | 调试和测试接口                       | ✅       |
+
 ## 4. 源码概览
 
-实现位于 `bus_system` Django 应用及 `school_bus` 项目配置中，主要模块包括：
+项目代码分为顶层 `school_bus` 配置和核心应用 `bus_system` 两部分，目录结构如下。
 
-- `models.py` – 用户、司机、车辆、预约及调度等数据模型。
-- `views.py` – 实时监控视图、位置更新接口及统计页面。
-- `tests.py` – 模型创建与监控视图的单元测试。
+```text
+manage.py                # 命令行入口
+school_bus/
+    settings.py          # 全局配置，启用 SQLite 和自定义用户模型
+    urls.py              # 项目路由入口，包含 admin 与 bus 应用
+bus_system/
+    models.py            # 定义 User、Driver、Vehicle、Booking 等模型类
+    views.py             # realtime_monitor、update_location、statistics_view
+    admin.py             # 后台管理注册及列表显示设置
+    management/commands/
+        init_data.py     # 初始化演示数据的自定义命令
+    templates/           # 基于 Bootstrap 的前端模板
+    tests.py             # 单元测试用例
+```
+
+主要函数说明：
+
+- **`realtime_monitor(request)`**：查询状态为已确认的调度信息并渲染监控页面；
+- **`update_location(request, dispatch_id)`**：接受司机上传的经纬度并保存到
+  `LocationHistory`；
+- **`statistics_view(request)`**：将静态统计数据传入模板，展示预约量和热门路线等。
+
+管理命令 `init_data` 会创建管理员、普通用户、司机及多辆车辆，方便开发时快速构造数据。 
 
 ## 5. 测试
 
@@ -140,14 +226,16 @@ sequenceDiagram
 1. **车辆创建**：验证 `Vehicle` 对象保存车牌号和容量。
 2. **预约创建**：确保新建预约默认状态为 `P`（待处理）。
 3. **实时监控视图**：登录用户访问时返回 HTTP 200，页面包含“实时车辆监控”。
+4. **位置更新接口**：向 `update-location` 端点 POST 经纬度数据后应生成一条
+   `LocationHistory` 记录。
 
 ### 5.3 测试报告
 
-安装 Django 后执行 `python manage.py test`，全部测试通过。
+安装依赖后执行 `python manage.py test`，4 个用例全部通过。
 
 ```
-Creating test database for alias 'default'...
-Found 3 test(s).
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+Found 4 test(s).
 System check identified some issues:
 
 WARNINGS:
@@ -155,11 +243,13 @@ WARNINGS:
 
 System check identified 1 issue (0 silenced).
 ...
+test_update_location_endpoint (bus_system.tests.BusSystemTests.test_update_location_endpoint)
+POST 经纬度数据后应在数据库中保存记录 ... ok
 ----------------------------------------------------------------------
-Ran 3 tests in 3.3s
+Ran 4 tests in 4.876s
 
 OK
-Destroying test database for alias 'default'...
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
 ```
 
 ## 6. 配置管理

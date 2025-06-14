@@ -61,3 +61,17 @@ class BusSystemTests(TestCase):
         response = self.client.get(reverse('realtime-monitor'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "实时车辆监控")
+
+    def test_update_location_endpoint(self):
+        """POST 经纬度数据后应在数据库中保存记录"""
+        self.client.login(username='testuser', password='testpass123')
+        url = reverse('update-location', args=[self.dispatch.id])
+        payload = {
+            'latitude': 39.9,
+            'longitude': 116.4
+        }
+        response = self.client.post(url, payload, content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        from .models import LocationHistory
+        count = LocationHistory.objects.filter(dispatch=self.dispatch).count()
+        self.assertEqual(count, 1)
