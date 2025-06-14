@@ -6,7 +6,8 @@ derived from the features outlined in the PDF document.
 
 from django.test import TestCase
 from django.urls import reverse
-from .models import User, Vehicle, Booking
+from django.utils import timezone
+from .models import User, Vehicle, Booking, Dispatch, Driver
 
 class BusSystemTests(TestCase):
     def setUp(self):
@@ -22,11 +23,29 @@ class BusSystemTests(TestCase):
             status='A',
             last_maintenance='2025-06-01'
         )
+        aware_time = timezone.make_aware(timezone.datetime(2025, 6, 15, 8, 0))
         self.booking = Booking.objects.create(
             user=self.user,
             pickup_location='校区A',
             destination='校区B',
-            scheduled_time='2025-06-15 08:00:00'
+            scheduled_time=aware_time
+        )
+
+        # 为实时监控视图准备一个调度记录
+        driver_user = User.objects.create_user(
+            username='driver1',
+            password='driverpass',
+            phone='13900139000'
+        )
+        driver = Driver.objects.create(
+            user=driver_user,
+            license_number='A1234567',
+            hire_date='2024-01-01'
+        )
+        self.dispatch = Dispatch.objects.create(
+            booking=self.booking,
+            driver=driver,
+            vehicle=self.vehicle
         )
 
     def test_vehicle_creation(self):
