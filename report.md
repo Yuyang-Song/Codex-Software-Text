@@ -32,13 +32,23 @@ classDiagram
     class User
     class Driver
     class Admin
-    class "预约校车" as Book
-    class "取消预约" as Cancel
-    class "查看实时位置" as Track
-    class "查看任务" as ViewTask
-    class "更新车辆状态" as UpdateStatus
-    class "车辆调度" as Dispatch
-    class "统计分析" as Stats
+    class Book
+    class Cancel
+    class Track
+    class ViewTask
+    class UpdateStatus
+    class Dispatch
+    class Stats
+
+    %% 中文说明可放在注释或图外说明中
+    %% Book：预约校车
+    %% Cancel：取消预约
+    %% Track：查看实时位置
+    %% ViewTask：查看任务
+    %% UpdateStatus：更新车辆状态
+    %% Dispatch：车辆调度
+    %% Stats：统计分析
+
     User -- Book
     User -- Cancel
     User -- Track
